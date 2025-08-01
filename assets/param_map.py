@@ -1,7 +1,11 @@
 # Taille de la map
-WINDOW_WIDTH = 1056
-WINDOW_HEIGHT = 624
+WINDOW_WIDTH = 2112
+WINDOW_HEIGHT = 1248 
 WINDOW_TITLE = "Saucise civilisation"
+
+# Taille de la camera
+CAMERA_WIDTH = 1056
+CAMERA_HEIGHT = 624
 
 # Taille des murs
 WALL_SCALING = 0.7

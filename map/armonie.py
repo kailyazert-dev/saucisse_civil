@@ -19,14 +19,15 @@ class GameView(arcade.View):
         self.tile_map = None
         self.scene = None
         self.physics_engine = None
+        self.camera_sprites = arcade.Camera2D()
+        self.camera_gui = arcade.Camera2D()
+        self.camera_speed = 0.1
 
         # Pour les jouers
         self.player_sprite = None
         self.pnj_sprite = []
 
         # Pour le model
-        model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../model/")
-        self.slm = GPT4All("Mistral-7B-Instruct-v0.3.Q3_K_M.gguf", model_path=model_path, allow_download=False)
         self.api_key = "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"
         self.current_pnj = None
         self.current_input = ""
@@ -43,12 +44,12 @@ class GameView(arcade.View):
 
         # Créer la scène à partir de la tilemap
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
-
+        
         # Créer le joueur
         humain = Humain(charisme=0.3, rigidite=0.3, intensite_boof=0.3, receptif_boof=0.3)
         self.player_sprite = Player(humain, "Kyle", "assets/images/player_d.png", scale=PLAYER_SCALING)
-        self.player_sprite.center_x = WINDOW_WIDTH // 2
-        self.player_sprite.center_y = 50
+        self.player_sprite.center_x = 500
+        self.player_sprite.center_y = 60
         self.scene.add_sprite("Player", self.player_sprite)
 
         #Creer les PNJs
@@ -88,6 +89,7 @@ class GameView(arcade.View):
     """ Fonction pour déssiner la map """
     def on_draw(self):
         self.clear()
+        self.camera_sprites.use()
         self.scene.draw()
 
         for pnj in self.pnj_sprite:
@@ -96,6 +98,7 @@ class GameView(arcade.View):
                arcade.draw_text("LALT : Discuter", pnj.center_x - 40, pnj.center_y - 40, arcade.color.LIGHT_GREEN, 14) 
                arcade.draw_text(pnj.get_nom(), pnj.center_x - 40, pnj.center_y + 40, arcade.color.ALLOY_ORANGE, 14) 
 
+        arcade.get_window().use()
         if self.is_typing or self.last_response:
             box_height = 100
             margin = 10       
@@ -106,7 +109,6 @@ class GameView(arcade.View):
                 bottom=0,
                 color=arcade.color.WHITE
             )
-        # Affichage du texte du joueur (input)
         if self.is_typing:
             arcade.draw_text(
                 f"{self.player_sprite.nom} : " + self.current_input,
@@ -117,12 +119,19 @@ class GameView(arcade.View):
             arcade.draw_text(
                 f"{self.current_pnj.nom} : " + self.last_response,
                 margin, box_height - 60, arcade.color.LIGHT_GREEN, 14
-            )    
+            )
+
+        # Déssine la camera
+        self.camera_gui.use()     
+
 
     """ Fonction qui met à jour la map """
     def on_update(self, delta_time):
         self.physics_engine.update()
         self.scene.update(delta_time)
+
+        # Scroll the screen to the player
+        self.scroll_to_player()
 
     """ Fonction pour gérer les touches """
     def on_key_press(self, key, modifiers):
@@ -167,18 +176,11 @@ class GameView(arcade.View):
                     self.is_typing = True                           # Modifier l'etat de base et active la possibiliter d'ecrire
                     self.current_input = ""                         # Initialise à vide le champ de discution
                     break
-            # if not pnj_found:
-            #     self.current_pnj = None
-            #     self.is_typing = False
-            #     self.current_input = ""
-            #     self.last_response = ""
-            #     for pnj in self.pnj_sprite:
-            #         pnj.texture = arcade.load_texture(pnj.image_path)
 
         elif self.is_typing and key == arcade.key.ENTER:             # Pour la touche ENTRER
             if self.current_pnj:
                 self.last_response = self.talk_model(self.current_input, self.api_key, self.current_pnj)  # Commence le dialogue en appellant la fonction
-            # self.current_input = ""    
+            self.current_input = ""    
 
         elif self.is_typing and key == arcade.key.BACKSPACE:         # Pour la touche supprimer
             self.current_input = self.current_input[:-1]
@@ -197,6 +199,30 @@ class GameView(arcade.View):
         elif key == arcade.key.RIGHT:
             self.player_sprite.change_x = 0        
             self.player_sprite.texture = self.player_sprite.textures["right"]
+
+    """ Fonction pour que la camera suit le joueur"""
+    def scroll_to_player(self):
+        """
+        Scroll the window to the player.
+
+        if CAMERA_SPEED is 1, the camera will immediately move to the desired
+        position. Anything between 0 and 1 will have the camera move to the
+        location with a smoother pan.
+        """
+
+        position = (self.player_sprite.center_x, self.player_sprite.center_y)
+        self.camera_sprites.position = arcade.math.lerp_2d(
+            self.camera_sprites.position, position, self.camera_speed,
+        )
+
+    """ Fonction pour redimensionner la fenêtre """
+    def on_resize(self, width: int, height: int):
+        """
+        Resize window
+        Handle the user grabbing the edge and resizing the window.
+        """
+        super().on_resize(width, height)
+        self.camera_sprites.match_window()
 
     """ Fonction pour écrire du texte pour la discution """
     def on_text(self, text):

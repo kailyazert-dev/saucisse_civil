@@ -1,17 +1,21 @@
 {
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
     "activeFile": "map/PHL_L.tmx",
     "expandedProjectPaths": [
         ".",
-        "map",
-        "map/tuile"
+        "map/tuile",
+        "map"
     ],
     "fileStates": {
         "map/PHL_L.tmx": {
-            "scale": 0.75,
-            "selectedLayer": 2,
+            "scale": 0.5383333333333333,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 610,
-                "y": 335.3333333333333
+                "x": 1078.328173374613,
+                "y": 480.18575851393183
             }
         },
         "map/tuile/tuile.tsx": {
@@ -37,7 +41,10 @@
             "scaleInEditor": 1
         }
     },
+    "map.fixedSize": true,
     "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 48,
+    "map.tileWidth": 48,
     "openFiles": [
         "map/PHL_L.tmx"
     ],
