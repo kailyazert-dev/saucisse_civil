@@ -1,0 +1,51 @@
+{
+    "activeFile": "map/PHL_L.tmx",
+    "expandedProjectPaths": [
+        ".",
+        "map",
+        "map/tuile"
+    ],
+    "fileStates": {
+        "map/PHL_L.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 610,
+                "y": 335.3333333333333
+            }
+        },
+        "map/tuile/tuile.tsx": {
+            "scaleInDock": 1
+        },
+        "map/tuile/tuile_exterieur.tsx": {
+            "scaleInDock": 1
+        },
+        "sans titre.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 673.3333333333333,
+                "y": 167.33333333333331
+            }
+        },
+        "tuile/tuile.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tuile/tuile_exterieur.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "map/PHL_L.tmx"
+    ],
+    "project": "",
+    "recentFiles": [
+        "map/PHL_L.tmx",
+        "sans titre.tmx",
+        "tuile/tuile_exterieur.tsx",
+        "tuile/tuile.tsx"
+    ]
+}

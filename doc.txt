@@ -1,0 +1,3 @@
+package installer :
+- arcade
+- gpt4all
