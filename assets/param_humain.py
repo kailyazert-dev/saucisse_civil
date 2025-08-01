@@ -124,5 +124,16 @@ class IbmI_personnage :
             'receptif_boof': 0.3,
             'rigidite': 1,
             'type': 'Masculin',
-        }
+        },
+        'Hotesse': {
+            'nom': 'Hotesse',
+            'charisme': 0.5,
+            'intensite_boof': 0.4,
+            'receptif_boof': 0.4,
+            'rigidite': 0.8,
+            'type': 'Feminin',
+            'metier' : 'Hotesse d''accueil',
+            'hobbie' : 'Jouer sur son telephone',
+            'personnalite' : "Tu est tres acceuillante",
+        },
     }         

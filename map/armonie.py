@@ -1,13 +1,10 @@
 import arcade
-import requests
-import math
 import os
 from openai import OpenAI
-from gpt4all import GPT4All
 from assets.param_humain import Noms, Images
 from classes.humain import Humain, PNJ, Player
 from classes.interaction import Interaction
-from assets.param_map import WINDOW_WIDTH, WINDOW_HEIGHT, WALL_SCALING, PLAYER_SCALING, MOVEMENT_SPEED
+from assets.param_map import WINDOW_WIDTH, WINDOW_HEIGHT, CAMERA_HEIGHT, CAMERA_WIDTH, WALL_SCALING, PLAYER_SCALING, MOVEMENT_SPEED
 from assets.param_humain import IbmI_personnage
 
 class GameView(arcade.View):
@@ -26,21 +23,31 @@ class GameView(arcade.View):
         # Pour les jouers
         self.player_sprite = None
         self.pnj_sprite = []
+        self.strategique_sprite = []
 
-        # Pour le model
+        # Pour les PNJ
+        self.current_pnj = None         # Pour le PNJ en face
+
+        # Pour les strategiques
+        self.current_strategique = None         # Pour le strategique en face
+
+        # Pour le model et les discution
         self.api_key = "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"
-        self.current_pnj = None
-        self.current_input = ""
-        self.last_response = ""
-        self.is_typing = False
+        self.current_input = ""           # Le message du player
+        self.last_response = ""           # La reponse du model
+        self.is_typing = False            # Ouverture du champ du dialogue 
 
     """ Fonction pour récupérer les élements de la map """
     def setup(self):
+
         # Chemin vers la carte TMX
-        map_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../map/PHL_L.tmx")
+        self.phl = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../map/PHL.tmx")
+        self.tma = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../map/TMA.tmx")
+
+        self.current_map = self.phl
 
         # Charger la carte TMX
-        self.tile_map = arcade.load_tilemap(map_path, scaling=1.0)
+        self.tile_map = arcade.load_tilemap(self.tma, scaling=1.0)
 
         # Créer la scène à partir de la tilemap
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
@@ -48,24 +55,24 @@ class GameView(arcade.View):
         # Créer le joueur
         humain = Humain(charisme=0.3, rigidite=0.3, intensite_boof=0.3, receptif_boof=0.3)
         self.player_sprite = Player(humain, "Kyle", "assets/images/player_d.png", scale=PLAYER_SCALING)
-        self.player_sprite.center_x = 500
-        self.player_sprite.center_y = 60
+        self.player_sprite.center_x = 550
+        self.player_sprite.center_y = 750
         self.scene.add_sprite("Player", self.player_sprite)
 
         #Creer les PNJs
         pnj = Humain(charisme=0.3, rigidite=0.3, intensite_boof=0.3, receptif_boof=0.3)
         louis = PNJ("Mael", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        louis.center_x=WINDOW_WIDTH//2 + 165
-        louis.center_y=WINDOW_HEIGHT//2 + 40
+        louis.center_x = 556
+        louis.center_y = 940
         mael = PNJ("Louis", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        mael.center_x=WINDOW_WIDTH//2 + 24 
-        mael.center_y=WINDOW_HEIGHT//2 + 40
+        mael.center_x = 694 
+        mael.center_y = 940
         thomas = PNJ("Thomas", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        thomas.center_x=WINDOW_WIDTH//2 + 24 
-        thomas.center_y=WINDOW_HEIGHT//2 - 104
+        thomas.center_x = 556 
+        thomas.center_y = 790
         kyle = PNJ("Kyle", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        kyle.center_x=WINDOW_WIDTH//2 + 165 
-        kyle.center_y=WINDOW_HEIGHT//2 - 104
+        kyle.center_x = 694 
+        kyle.center_y = 790
         self.pnj_sprite.append(louis)
         self.pnj_sprite.append(mael)
         self.pnj_sprite.append(thomas)
@@ -75,6 +82,14 @@ class GameView(arcade.View):
         self.scene.add_sprite("Pnj", thomas)
         self.scene.add_sprite("Pnj", kyle)
 
+        # Creer les strategiques
+        hotesse = PNJ("Hotesse", pnj, "Femelle", "assets/images/hotesse.png", PLAYER_SCALING)
+        hotesse.center_x = 2850 
+        hotesse.center_y = 1848
+        self.strategique_sprite.append(hotesse)
+        self.scene.add_sprite("Pnj", hotesse)
+
+        # Creer les obstacles
         obstacles = arcade.SpriteList()
         obstacles.extend(self.pnj_sprite)
         obstacles.extend(self.scene["Meuble_H"])
@@ -92,37 +107,56 @@ class GameView(arcade.View):
         self.camera_sprites.use()
         self.scene.draw()
 
+        # Pour dialoguer avec les strategiques
+        for strategique in self.strategique_sprite:
+            distance = arcade.get_distance_between_sprites(self.player_sprite, strategique)
+            if distance < 100:
+               arcade.draw_text("RALT : Aller à la TMA", strategique.center_x - 40, strategique.center_y - 40, arcade.color.LIGHT_GREEN, 18) 
+               arcade.draw_text(strategique.get_nom(), strategique.center_x - 40, strategique.center_y + 40, arcade.color.ALLOY_ORANGE, 18) 
+
+        # Pour dialoguer avec les PNJ
         for pnj in self.pnj_sprite:
             distance = arcade.get_distance_between_sprites(self.player_sprite, pnj)
             if distance < 50:
-               arcade.draw_text("LALT : Discuter", pnj.center_x - 40, pnj.center_y - 40, arcade.color.LIGHT_GREEN, 14) 
-               arcade.draw_text(pnj.get_nom(), pnj.center_x - 40, pnj.center_y + 40, arcade.color.ALLOY_ORANGE, 14) 
-
+               arcade.draw_text("LALT : Discuter", pnj.center_x - 40, pnj.center_y - 40, arcade.color.LIGHT_GREEN, 18) 
+               arcade.draw_text(pnj.get_nom(), pnj.center_x - 40, pnj.center_y + 40, arcade.color.ALLOY_ORANGE, 18) 
+        # Déssine la boite de dialogue
         arcade.get_window().use()
         if self.is_typing or self.last_response:
-            box_height = 100
-            margin = 10       
+            margin = 15
+            left=self.player_sprite.center_x - CAMERA_WIDTH // 2
+            right=self.player_sprite.center_x + CAMERA_WIDTH // 2
+            top=self.player_sprite.center_y - 100
+            bottom=self.player_sprite.center_y - (CAMERA_WIDTH // 2) - 100 
+            
             arcade.draw_lrbt_rectangle_filled(
-                left=0,
-                right=WINDOW_WIDTH,
-                top=box_height,
-                bottom=0,
+                left=left,
+                right=right,
+                top=top,
+                bottom=bottom,
                 color=arcade.color.WHITE
             )
+        # Affiche le message du jouer
         if self.is_typing:
             arcade.draw_text(
                 f"{self.player_sprite.nom} : " + self.current_input,
-                margin, box_height - 30, arcade.color.BLACK, 14
+                left + margin, top - margin - 15, arcade.color.BLACK, 14
             )
         # Affichage de la réponse du PNJ
         if self.last_response:
             arcade.draw_text(
                 f"{self.current_pnj.nom} : " + self.last_response,
-                margin, box_height - 60, arcade.color.LIGHT_GREEN, 14
+                left + margin, top - margin - 40, arcade.color.LIGHT_GREEN, 14
             )
 
         # Déssine la camera
-        self.camera_gui.use()     
+        self.camera_gui.use()    
+
+        # arcade.draw_rect_filled(arcade.rect.XYWH(self.width // 2, 20, self.width, 40),
+        #                         arcade.color.ALMOND)
+        # text = f"Scroll value: ({self.camera_sprites.position[0]:5.1f}, " \
+        #        f"{self.camera_sprites.position[1]:5.1f})"
+        # arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20) 
 
 
     """ Fonction qui met à jour la map """
@@ -184,6 +218,9 @@ class GameView(arcade.View):
 
         elif self.is_typing and key == arcade.key.BACKSPACE:         # Pour la touche supprimer
             self.current_input = self.current_input[:-1]
+
+        elif self.is_typing and key == arcade.key.RALT:
+            self.current_map = self.tma    
 
     """ Fonction pour gerer les touches"""
     def on_key_release(self, key, modifiers):

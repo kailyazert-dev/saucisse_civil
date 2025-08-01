@@ -1,5 +1,5 @@
 import arcade
-from map import PHL_L, armonie
+from map import armonie
 from classes import environnement
 from assets.param_map import CAMERA_WIDTH, CAMERA_HEIGHT, WINDOW_TITLE
 import os
