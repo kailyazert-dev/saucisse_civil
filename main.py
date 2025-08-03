@@ -1,7 +1,7 @@
 import arcade
-from map import armonie
+from map.manager import MapManager
 from classes import environnement
-from assets.param_map import CAMERA_WIDTH, CAMERA_HEIGHT, WINDOW_TITLE
+from assets.param_map import WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE
 import os
 
 def main():
@@ -11,14 +11,10 @@ def main():
     bar = environnement.Environnement("Bar", tension_sociale=0.2, densite_sociale=0.8, regles_sociale="informelles")
 
     # Crée la fenêtre arcade
-    window = arcade.Window(CAMERA_WIDTH, CAMERA_HEIGHT, WINDOW_TITLE, resizable=True)
+    window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, resizable=False)
 
-    # Crée et configure la vue du jeu, en passant l'environnement
-    game = armonie.GameView(bar)
-    game.setup()
-
-    # Affiche la vue sur la fenêtre
-    window.show_view(game)
+    manager = MapManager(window, travaille)
+    manager.load_initial_map()
 
     # Lance la boucle de jeu arcade
     arcade.run()

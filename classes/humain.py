@@ -1,6 +1,6 @@
 import random
 import arcade
-from assets.param_map import WINDOW_WIDTH, WINDOW_HEIGHT, PLAYER_SCALING
+from assets.param_map import MAP_WIDTH, MAP_HEIGHT, PLAYER_SCALING
 
 class Humain:
     def __init__(self, charisme, rigidite, intensite_boof, receptif_boof, x=0, y=0):
@@ -81,13 +81,13 @@ class Player(arcade.Sprite):
         # Check for out-of-bounds
         if self.left < 0:
             self.left = 0
-        elif self.right > WINDOW_WIDTH - 1:
-            self.right = WINDOW_WIDTH - 1
+        elif self.right > MAP_WIDTH - 1:
+            self.right = MAP_WIDTH - 1
 
         if self.bottom < 0:
             self.bottom = 0
-        elif self.top > WINDOW_HEIGHT - 1:
-            self.top = WINDOW_HEIGHT - 1
+        elif self.top > MAP_HEIGHT - 1:
+            self.top = MAP_HEIGHT - 1
 
         # Animation : alterne la texture toutes les 0.2s si le joueur bouge
         if self.change_x != 0 or self.change_y != 0:

@@ -3,19 +3,47 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "map/PHL_L.tmx",
+    "activeFile": "",
     "expandedProjectPaths": [
-        ".",
-        "map/tuile",
-        "map"
     ],
     "fileStates": {
-        "map/PHL_L.tmx": {
+        "game/tuiles/exterieur.tsx": {
+            "scaleInDock": 1
+        },
+        "game/tuiles/interieure.tsx": {
+            "scaleInDock": 1
+        },
+        "map/armonie/PHL.tmx": {
             "scale": 0.75,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 528,
+                "y": 2098.6666666666665
+            }
+        },
+        "map/armonie/TMA.tmx": {
+            "scale": 0.32423406862745097,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 555.3333333333333,
-                "y": 711.3333333333333
+                "x": 1233.6766512331099,
+                "y": 1239.8450344892753
+            }
+        },
+        "map/armonie/tuile/tuile.tsx": {
+            "scaleInDock": 1
+        },
+        "map/armonie/tuile/tuile_exterieur.tsx": {
+            "scaleInDock": 1
+        },
+        "map/armonie/tuiles/interieure.tsx": {
+            "scaleInDock": 1
+        },
+        "map/home/HOME.tmx": {
+            "scale": 0.6729166666666667,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 720.7430340557274,
+                "y": 480
             }
         },
         "map/tuile/tuile.tsx": {
@@ -23,36 +51,15 @@
         },
         "map/tuile/tuile_exterieur.tsx": {
             "scaleInDock": 1
-        },
-        "sans titre.tmx": {
-            "scale": 0.75,
-            "selectedLayer": 2,
-            "viewCenter": {
-                "x": 673.3333333333333,
-                "y": 167.33333333333331
-            }
-        },
-        "tuile/tuile.tsx": {
-            "scaleInDock": 1,
-            "scaleInEditor": 1
-        },
-        "tuile/tuile_exterieur.tsx": {
-            "scaleInDock": 1,
-            "scaleInEditor": 1
         }
     },
-    "map.fixedSize": true,
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 48,
     "map.tileWidth": 48,
     "openFiles": [
-        "map/PHL_L.tmx"
     ],
-    "project": "",
+    "project": "sans titre.tiled-project",
     "recentFiles": [
-        "map/PHL_L.tmx",
-        "sans titre.tmx",
-        "tuile/tuile_exterieur.tsx",
-        "tuile/tuile.tsx"
+        "map/armonie/TMA.tmx"
     ]
 }

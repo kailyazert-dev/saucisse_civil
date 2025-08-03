@@ -4,7 +4,7 @@ from openai import OpenAI
 from assets.param_humain import Noms, Images
 from classes.humain import Humain, PNJ, Player
 from classes.interaction import Interaction
-from assets.param_map import WINDOW_WIDTH, WINDOW_HEIGHT, CAMERA_HEIGHT, CAMERA_WIDTH, WALL_SCALING, PLAYER_SCALING, MOVEMENT_SPEED
+from assets.param_map import WINDOW_WIDTH, WALL_SCALING, PLAYER_SCALING, MOVEMENT_SPEED
 from assets.param_humain import IbmI_personnage
 
 class GameView(arcade.View):
@@ -37,17 +37,17 @@ class GameView(arcade.View):
         self.last_response = ""           # La reponse du model
         self.is_typing = False            # Ouverture du champ du dialogue 
 
+    def set_manager(self, manager):
+        self.manager = manager
+
     """ Fonction pour récupérer les élements de la map """
     def setup(self):
 
         # Chemin vers la carte TMX
-        self.phl = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../map/PHL.tmx")
-        self.tma = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../map/TMA.tmx")
-
-        self.current_map = self.phl
+        home = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../home/home.tmx")
 
         # Charger la carte TMX
-        self.tile_map = arcade.load_tilemap(self.tma, scaling=1.0)
+        self.tile_map = arcade.load_tilemap(home, scaling=1.0)
 
         # Créer la scène à partir de la tilemap
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
@@ -55,43 +55,19 @@ class GameView(arcade.View):
         # Créer le joueur
         humain = Humain(charisme=0.3, rigidite=0.3, intensite_boof=0.3, receptif_boof=0.3)
         self.player_sprite = Player(humain, "Kyle", "assets/images/player_d.png", scale=PLAYER_SCALING)
-        self.player_sprite.center_x = 550
-        self.player_sprite.center_y = 750
+        self.player_sprite.center_x = 720
+        self.player_sprite.center_y = 50
         self.scene.add_sprite("Player", self.player_sprite)
 
         #Creer les PNJs
         pnj = Humain(charisme=0.3, rigidite=0.3, intensite_boof=0.3, receptif_boof=0.3)
-        louis = PNJ("Mael", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        louis.center_x = 556
-        louis.center_y = 940
-        mael = PNJ("Louis", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        mael.center_x = 694 
-        mael.center_y = 940
-        thomas = PNJ("Thomas", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        thomas.center_x = 556 
-        thomas.center_y = 790
-        kyle = PNJ("Kyle", pnj, "Male", "assets/images/player_d.png", PLAYER_SCALING)
-        kyle.center_x = 694 
-        kyle.center_y = 790
-        self.pnj_sprite.append(louis)
-        self.pnj_sprite.append(mael)
-        self.pnj_sprite.append(thomas)
-        self.pnj_sprite.append(kyle)
-        self.scene.add_sprite("Pnj", louis)
-        self.scene.add_sprite("Pnj", mael)
-        self.scene.add_sprite("Pnj", thomas)
-        self.scene.add_sprite("Pnj", kyle)
 
         # Creer les strategiques
-        hotesse = PNJ("Hotesse", pnj, "Femelle", "assets/images/hotesse.png", PLAYER_SCALING)
-        hotesse.center_x = 2850 
-        hotesse.center_y = 1848
-        self.strategique_sprite.append(hotesse)
-        self.scene.add_sprite("Pnj", hotesse)
 
         # Creer les obstacles
         obstacles = arcade.SpriteList()
         obstacles.extend(self.pnj_sprite)
+        obstacles.extend(self.strategique_sprite)
         obstacles.extend(self.scene["Meuble_H"])
         obstacles.extend(self.scene["Mur"])
 
@@ -110,10 +86,12 @@ class GameView(arcade.View):
         # Pour dialoguer avec les strategiques
         for strategique in self.strategique_sprite:
             distance = arcade.get_distance_between_sprites(self.player_sprite, strategique)
-            if distance < 100:
-               arcade.draw_text("RALT : Aller à la TMA", strategique.center_x - 40, strategique.center_y - 40, arcade.color.LIGHT_GREEN, 18) 
-               arcade.draw_text(strategique.get_nom(), strategique.center_x - 40, strategique.center_y + 40, arcade.color.ALLOY_ORANGE, 18) 
-
+            if distance < 50:
+                self.current_strategique = strategique
+                arcade.draw_text("RALT : Aller à la PHL", strategique.center_x - 90, strategique.center_y - 50, arcade.color.LIGHT_GREEN, 18) 
+                arcade.draw_text(strategique.get_nom(), strategique.center_x - 40, strategique.center_y + 40, arcade.color.ALLOY_ORANGE, 18) 
+                break
+            
         # Pour dialoguer avec les PNJ
         for pnj in self.pnj_sprite:
             distance = arcade.get_distance_between_sprites(self.player_sprite, pnj)
@@ -124,10 +102,10 @@ class GameView(arcade.View):
         arcade.get_window().use()
         if self.is_typing or self.last_response:
             margin = 15
-            left=self.player_sprite.center_x - CAMERA_WIDTH // 2
-            right=self.player_sprite.center_x + CAMERA_WIDTH // 2
+            left=self.player_sprite.center_x - WINDOW_WIDTH // 2
+            right=self.player_sprite.center_x + WINDOW_WIDTH // 2
             top=self.player_sprite.center_y - 100
-            bottom=self.player_sprite.center_y - (CAMERA_WIDTH // 2) - 100 
+            bottom=self.player_sprite.center_y - (WINDOW_WIDTH // 2) - 100 
             
             arcade.draw_lrbt_rectangle_filled(
                 left=left,
@@ -152,11 +130,11 @@ class GameView(arcade.View):
         # Déssine la camera
         self.camera_gui.use()    
 
-        # arcade.draw_rect_filled(arcade.rect.XYWH(self.width // 2, 20, self.width, 40),
-        #                         arcade.color.ALMOND)
-        # text = f"Scroll value: ({self.camera_sprites.position[0]:5.1f}, " \
-        #        f"{self.camera_sprites.position[1]:5.1f})"
-        # arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20) 
+        arcade.draw_rect_filled(arcade.rect.XYWH(self.width // 2, 20, self.width, 40),
+                                arcade.color.ALMOND)
+        text = f"Scroll value: ({self.camera_sprites.position[0]:5.1f}, " \
+               f"{self.camera_sprites.position[1]:5.1f})"
+        arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20) 
 
 
     """ Fonction qui met à jour la map """
@@ -175,6 +153,11 @@ class GameView(arcade.View):
             self.last_response = ""
             self.current_input = ""
             self.current_pnj = None
+            
+        # Ferer la possibilité d'aller à une autre map    
+        if self.current_strategique and key in (arcade.key.UP, arcade.key.DOWN, arcade.key.LEFT, arcade.key.RIGHT):
+            self.current_strategique = None
+
         if key == arcade.key.UP:                            # Pour la touche fléche du haut
             self.player_sprite.change_y = MOVEMENT_SPEED    # La vitesse de déplacement
             self.player_sprite.direction = "up"             # La direction
@@ -219,8 +202,9 @@ class GameView(arcade.View):
         elif self.is_typing and key == arcade.key.BACKSPACE:         # Pour la touche supprimer
             self.current_input = self.current_input[:-1]
 
-        elif self.is_typing and key == arcade.key.RALT:
-            self.current_map = self.tma    
+        # Pour changer de map
+        elif self.current_strategique and key == arcade.key.RALT:
+            self.manager.switch_map()   
 
     """ Fonction pour gerer les touches"""
     def on_key_release(self, key, modifiers):
