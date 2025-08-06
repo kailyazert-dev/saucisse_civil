@@ -1,5 +1,5 @@
 import arcade
-from map.manager import MapManager
+from map.map_manager import MapManager
 from classes import environnement
 from assets.param_map import WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE
 import os
